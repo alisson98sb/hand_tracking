@@ -38,7 +38,7 @@ while camera.isOpened():
         continue
 
     img, all_hands = find_coord_hand(frame)
-    print(all_hands)
+
     cv2.imshow("Camera", img)
 
     if cv2.waitKey(1) == 27:  # Tecla 'Esc' para sair
