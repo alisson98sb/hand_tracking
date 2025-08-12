@@ -17,8 +17,7 @@ def find_coord_hand(img, side_inverted=False):
     result = hands.process(img_rgb)
     all_hands = []
     if result.multi_hand_landmarks:
-        for hand_side, hand_landmarks in zip(result.multi_handedness,result.multi_hand_landmarks):
-            all_hands.append(hand_landmarks)
+        for hand_side, hand_landmarks in zip(result.multi_handedness, result.multi_hand_landmarks):
             hand_info = {}
             coords = []
             for mark in hand_landmarks.landmark:
@@ -27,18 +26,28 @@ def find_coord_hand(img, side_inverted=False):
                 coord_z = int(mark.z * resolution_x)
                 coords.append((coord_x, coord_y, coord_z))
                 hand_info['coordenadas'] = coords
-                if side_inverted:
-                    if hand_side.classification[0].label == "Left":
-                        hand_info["side"] = "Right"
-                    else:
-                        hand_info["side"] = "Left"
+            if side_inverted:
+                if hand_side.classification[0].label == "Left":
+                    hand_info["side"] = "Right"
                 else:
-                    hand_info["side"] = hand_side.classification[0].label
-                print(hand_info["side"])
-                
-                all_hands.append(hand_info)
+                    hand_info["side"] = "Left"
+            else:
+                hand_info["side"] = hand_side.classification[0].label
+            all_hands.append(hand_info)
+
             mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
     return img, all_hands
+
+def fingers_raised(hand):
+    fingers = []
+    for fingertip in [8, 12, 16, 20]:
+        if hand['coordenadas'][fingertip][1] < hand['coordenadas'][fingertip-2][1]:
+            fingers.append(True)  # Dedo levantado
+            #Exemplo: dedo indicador (8) está acima do dedo médio (6), ou seja, levantado. 
+            #Nesse caso a lista fica [True, False, False, False] se apenas o indicador estiver levantado.
+        else:
+            fingers.append(False)  # Dedo abaixado
+    return fingers
 
 while camera.isOpened():
     ret, frame = camera.read()
@@ -46,10 +55,13 @@ while camera.isOpened():
     if not ret:
         print("Frame vazio da camera, encerrando...")
         continue
+    img, all_hands = find_coord_hand(frame)
 
-    img, all_hands = find_coord_hand(frame, False)
+    if len(all_hands) == 1:
+        info_finger_hand = fingers_raised(all_hands[0])
+        print(info_finger_hand)
 
+    key = cv2.waitKey(1)
     cv2.imshow("Camera", img)
-
-    if cv2.waitKey(1) == 27:  # Tecla 'Esc' para sair
+    if key == 27:  # Tecla 'Esc' para sair
         break
