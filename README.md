@@ -27,7 +27,26 @@ Sistema de assistente virtual que combina **detecção de gestos manuais via web
 pip install -r requirements.txt
 ```
 
-### 2. Executar o Assistente
+### 2. Instalar FFmpeg (Necessário para Whisper)
+
+**Windows:** Veja instruções detalhadas em [INSTALAR_FFMPEG.md](INSTALAR_FFMPEG.md)
+
+**Rápido (com Chocolatey):**
+```powershell
+choco install ffmpeg
+```
+
+**Linux:**
+```bash
+sudo apt install ffmpeg  # Ubuntu/Debian
+```
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+### 3. Executar o Assistente
 
 ```bash
 python assistente_gestos.py

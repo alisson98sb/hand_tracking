@@ -97,6 +97,10 @@ class VoiceRecorder:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"temp/comando_{timestamp}.wav"
 
+        # Garantir caminho absoluto
+        if not os.path.isabs(filename):
+            filename = os.path.abspath(filename)
+
         # Normalizar e converter para int16
         audio_normalized = np.int16(audio_data * 32767)
         write(filename, self.sample_rate, audio_normalized)
