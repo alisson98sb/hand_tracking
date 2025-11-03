@@ -20,33 +20,73 @@ class CommandExecutor:
         self.system = platform.system()  # Windows, Linux, Darwin (macOS)
         self.command_history = []
 
-        # Mapeamento de comandos
+        # Mapeamento de comandos com PALAVRAS-CHAVE SIMPLES
         self.commands = {
-            # Navegadores
+            # Navegadores - Comandos naturais e diretos
+            "navegador": self._open_browser,
             "abrir navegador": self._open_browser,
+            "chrome": self._open_chrome,
             "abrir chrome": self._open_chrome,
+            "google chrome": self._open_chrome,
+            "firefox": self._open_firefox,
             "abrir firefox": self._open_firefox,
+            "edge": self._open_edge,
             "abrir edge": self._open_edge,
 
-            # Aplicativos
+            # Aplicativos - Palavra única OU comando completo
+            "calculadora": self._open_calculator,
             "abrir calculadora": self._open_calculator,
+            "calc": self._open_calculator,
+            "bloco de notas": self._open_notepad,
             "abrir bloco de notas": self._open_notepad,
+            "notepad": self._open_notepad,
+            "explorador": self._open_explorer,
             "abrir explorador": self._open_explorer,
+            "pasta": self._open_explorer,
+            "arquivos": self._open_explorer,
+            "terminal": self._open_terminal,
             "abrir terminal": self._open_terminal,
+            "cmd": self._open_terminal,
+            "prompt": self._open_terminal,
+
+            # Aplicativos Profissionais
+            "word": self._open_word,
+            "abrir word": self._open_word,
+            "microsoft word": self._open_word,
+            "excel": self._open_excel,
+            "abrir excel": self._open_excel,
+            "powerpoint": self._open_powerpoint,
+            "abrir powerpoint": self._open_powerpoint,
+            "vscode": self._open_vscode,
+            "abrir vscode": self._open_vscode,
+            "visual studio code": self._open_vscode,
+            "code": self._open_vscode,
+            "postman": self._open_postman,
+            "abrir postman": self._open_postman,
 
             # Sistema
             "aumentar volume": self._volume_up,
+            "volume alto": self._volume_up,
             "diminuir volume": self._volume_down,
+            "volume baixo": self._volume_down,
             "silenciar": self._mute,
+            "mudo": self._mute,
 
             # Utilidades
             "que horas são": self._tell_time,
+            "horas": self._tell_time,
+            "hora": self._tell_time,
             "que dia é hoje": self._tell_date,
+            "data": self._tell_date,
+            "dia": self._tell_date,
             "tirar screenshot": self._screenshot,
+            "screenshot": self._screenshot,
+            "print screen": self._screenshot,
 
             # Pesquisa
             "pesquisar": self._search_web,
             "buscar": self._search_web,
+            "procurar": self._search_web,
         }
 
     def execute(self, command_text):
@@ -156,6 +196,101 @@ class CommandExecutor:
         else:
             subprocess.Popen(["gnome-terminal"])
             return "Abrindo terminal"
+
+    # ===== APLICATIVOS PROFISSIONAIS =====
+
+    def _open_word(self, text):
+        """Abre o Microsoft Word"""
+        if self.system == "Windows":
+            paths = [
+                r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE",
+                r"C:\Program Files\Microsoft Office\Office16\WINWORD.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\Office16\WINWORD.EXE",
+            ]
+            for path in paths:
+                if os.path.exists(path):
+                    subprocess.Popen([path])
+                    return "Abrindo Word"
+            return "Word não encontrado. Certifique-se que está instalado."
+        return "Word disponível apenas no Windows"
+
+    def _open_excel(self, text):
+        """Abre o Microsoft Excel"""
+        if self.system == "Windows":
+            paths = [
+                r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE",
+                r"C:\Program Files\Microsoft Office\Office16\EXCEL.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\Office16\EXCEL.EXE",
+            ]
+            for path in paths:
+                if os.path.exists(path):
+                    subprocess.Popen([path])
+                    return "Abrindo Excel"
+            return "Excel não encontrado. Certifique-se que está instalado."
+        return "Excel disponível apenas no Windows"
+
+    def _open_powerpoint(self, text):
+        """Abre o Microsoft PowerPoint"""
+        if self.system == "Windows":
+            paths = [
+                r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE",
+                r"C:\Program Files\Microsoft Office\Office16\POWERPNT.EXE",
+                r"C:\Program Files (x86)\Microsoft Office\Office16\POWERPNT.EXE",
+            ]
+            for path in paths:
+                if os.path.exists(path):
+                    subprocess.Popen([path])
+                    return "Abrindo PowerPoint"
+            return "PowerPoint não encontrado. Certifique-se que está instalado."
+        return "PowerPoint disponível apenas no Windows"
+
+    def _open_vscode(self, text):
+        """Abre o Visual Studio Code"""
+        if self.system == "Windows":
+            paths = [
+                r"C:\Users\{}\AppData\Local\Programs\Microsoft VS Code\Code.exe".format(os.getenv("USERNAME")),
+                r"C:\Program Files\Microsoft VS Code\Code.exe",
+                r"C:\Program Files (x86)\Microsoft VS Code\Code.exe",
+            ]
+            for path in paths:
+                if os.path.exists(path):
+                    subprocess.Popen([path])
+                    return "Abrindo VS Code"
+            # Tentar pelo comando 'code'
+            try:
+                subprocess.Popen(["code"])
+                return "Abrindo VS Code"
+            except:
+                return "VS Code não encontrado. Certifique-se que está instalado."
+        elif self.system == "Darwin":
+            subprocess.Popen(["open", "-a", "Visual Studio Code"])
+            return "Abrindo VS Code"
+        else:
+            subprocess.Popen(["code"])
+            return "Abrindo VS Code"
+
+    def _open_postman(self, text):
+        """Abre o Postman"""
+        if self.system == "Windows":
+            paths = [
+                r"C:\Users\{}\AppData\Local\Postman\Postman.exe".format(os.getenv("USERNAME")),
+                r"C:\Program Files\Postman\Postman.exe",
+                r"C:\Program Files (x86)\Postman\Postman.exe",
+            ]
+            for path in paths:
+                if os.path.exists(path):
+                    subprocess.Popen([path])
+                    return "Abrindo Postman"
+            return "Postman não encontrado. Certifique-se que está instalado."
+        elif self.system == "Darwin":
+            subprocess.Popen(["open", "-a", "Postman"])
+            return "Abrindo Postman"
+        else:
+            subprocess.Popen(["postman"])
+            return "Abrindo Postman"
 
     # ===== SISTEMA =====
 

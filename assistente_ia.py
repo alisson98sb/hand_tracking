@@ -53,6 +53,7 @@ class AssistenteIA:
         # TTS (Text-to-Speech)
         self.use_tts = use_tts
         self.tts_engine = None
+        self.tts_is_speaking = False  # Flag para controlar se TTS está falando
         if use_tts:
             try:
                 self.tts_engine = pyttsx3.init()
@@ -64,11 +65,12 @@ class AssistenteIA:
                 self.tts_engine = None
 
         # Estados
-        self.state = 'IDLE'  # IDLE, ACTIVE, RECORDING, PROCESSING
+        self.state = 'IDLE'  # IDLE, ACTIVE, RECORDING, PROCESSING, WAITING
         self.last_gesture = 'NONE'
         self.last_transcription = ""
         self.last_response = ""
         self.voice_model_loaded = False
+        self.recording_countdown = 0  # Contador de delay antes de gravar
 
         # Câmera
         self.camera = cv2.VideoCapture(0)
@@ -130,8 +132,12 @@ class AssistenteIA:
         """Fala um texto usando TTS"""
         if self.tts_engine and self.use_tts:
             def tts_speak():
+                self.tts_is_speaking = True
                 self.tts_engine.say(text)
                 self.tts_engine.runAndWait()
+                # Aguardar 1 segundo extra após terminar de falar
+                time.sleep(1.0)
+                self.tts_is_speaking = False
 
             thread = threading.Thread(target=tts_speak, daemon=True)
             thread.start()
@@ -176,8 +182,22 @@ class AssistenteIA:
 
         def record():
             self.is_recording = True
-            print("\n[GRAVANDO] Fale agora...")
+            self.state = 'WAITING'  # Estado de espera
+            print("\n[AGUARDANDO] Preparando para gravar...")
             self.speak("Escutando")
+
+            # Aguardar TTS terminar de falar + delay extra
+            while self.tts_is_speaking:
+                time.sleep(0.1)
+
+            # Countdown visual de 3 segundos
+            for i in range(3, 0, -1):
+                self.recording_countdown = i
+                time.sleep(1.0)
+
+            self.recording_countdown = 0
+            self.state = 'RECORDING'
+            print("[GRAVANDO] Fale AGORA!")
 
             texto, arquivo = self.voice_recorder.record_and_transcribe(
                 duration=5,
@@ -233,6 +253,7 @@ class AssistenteIA:
         state_colors = {
             'IDLE': (100, 100, 100),
             'ACTIVE': (0, 255, 0),
+            'WAITING': (255, 255, 0),  # Amarelo para espera
             'RECORDING': (0, 0, 255),
             'PROCESSING': (255, 165, 0)
         }
@@ -240,7 +261,8 @@ class AssistenteIA:
         state_labels = {
             'IDLE': "INATIVO",
             'ACTIVE': "ATIVO",
-            'RECORDING': "GRAVANDO...",
+            'WAITING': "AGUARDANDO...",
+            'RECORDING': "GRAVANDO AGORA!",
             'PROCESSING': "PROCESSANDO..."
         }
 
@@ -306,6 +328,47 @@ class AssistenteIA:
             cv2.putText(frame, "Mostre 1 dedo para gravar comando",
                         (20, 90), font, 0.5, (200, 200, 200), 1)
 
+        # CONTADOR VISUAL GRANDE NO CENTRO DA TELA
+        if self.recording_countdown > 0:
+            # Fundo semi-transparente
+            overlay = frame.copy()
+            center_x = self.resolution_x // 2
+            center_y = self.resolution_y // 2
+
+            # Círculo de fundo
+            cv2.circle(overlay, (center_x, center_y), 150, (0, 0, 0), -1)
+            cv2.addWeighted(overlay, 0.7, frame, 0.3, 0, frame)
+
+            # Número do contador GIGANTE
+            countdown_text = str(self.recording_countdown)
+            font_size = 10
+            countdown_thickness = 15
+            text_size = cv2.getTextSize(countdown_text, font, font_size, countdown_thickness)[0]
+            text_x = center_x - text_size[0] // 2
+            text_y = center_y + text_size[1] // 2
+
+            # Efeito de brilho (sombra branca)
+            cv2.putText(frame, countdown_text, (text_x + 5, text_y + 5),
+                        font, font_size, (255, 255, 255), countdown_thickness + 2)
+            # Número principal em amarelo
+            cv2.putText(frame, countdown_text, (text_x, text_y),
+                        font, font_size, (0, 255, 255), countdown_thickness)
+
+            # Texto auxiliar
+            helper_text = "Prepare-se para falar..."
+            helper_size = cv2.getTextSize(helper_text, font, 1.2, 2)[0]
+            helper_x = center_x - helper_size[0] // 2
+            cv2.putText(frame, helper_text, (helper_x, center_y + 120),
+                        font, 1.2, (255, 255, 255), 2)
+
+        # Indicador de gravação ativa
+        elif self.state == 'RECORDING':
+            # Indicador piscante de "REC"
+            if int(time.time() * 2) % 2 == 0:  # Pisca a cada 0.5s
+                cv2.circle(frame, (50, 50), 15, (0, 0, 255), -1)
+                cv2.putText(frame, "REC", (70, 55),
+                            font, 0.7, (0, 0, 255), 2)
+
         return frame
 
     def run(self):
@@ -362,9 +425,9 @@ class AssistenteIA:
 if __name__ == "__main__":
     # Configurar aqui o provider de IA
     assistente = AssistenteIA(
-        ai_provider="ollama",  # Opcoes: "ollama", "openai", "groq"
-        ai_model=None,         # None = usa modelo padrão
-        api_key=None,          # Necessário para OpenAI/Groq
-        use_tts=True           # Ativar síntese de voz
+        ai_provider="ollama",          # Opcoes: "ollama", "openai", "groq"
+        ai_model="deepseek-r1:1.5b",   # Modelo menor (1.1GB) - ideal para pouca RAM
+        api_key=None,                  # Necessário para OpenAI/Groq
+        use_tts=True                   # Ativar síntese de voz
     )
     assistente.run()
