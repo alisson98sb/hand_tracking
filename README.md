@@ -4,11 +4,19 @@ Sistema de assistente virtual que combina **detecção de gestos manuais via web
 
 ## ✨ Funcionalidades
 
+### 🤖 Versão com IA (`assistente_ia.py`) - Recomendado
 - 🖐️ **Detecção de Mãos**: Rastreamento em tempo real usando MediaPipe
 - 🎯 **Reconhecimento de Gestos**: Identifica gestos específicos (mão aberta, punho, dedos levantados)
 - 🎤 **Reconhecimento de Voz**: Transcrição offline em português usando Whisper
+- 🧠 **IA Conversacional**: Respostas inteligentes (Ollama/OpenAI/Groq)
+- 🔊 **Síntese de Voz (TTS)**: Assistente fala as respostas
+- ⚙️ **Comandos do Sistema**: Controle do computador por voz
 - 🔄 **Máquina de Estados**: Sistema inteligente que responde a gestos
 - 💬 **Interface Visual**: Feedback em tempo real na tela
+
+### 🎮 Versão Básica (`assistente_gestos.py`)
+- Todas as funcionalidades acima, exceto IA conversacional e TTS
+- Ideal para testar o sistema sem dependências de IA
 
 ## 🎮 Gestos Disponíveis
 
@@ -46,13 +54,38 @@ sudo apt install ffmpeg  # Ubuntu/Debian
 brew install ffmpeg
 ```
 
-### 3. Executar o Assistente
+### 3. Configurar IA (Opcional - apenas para `assistente_ia.py`)
 
+**Opção 1: Ollama (Recomendado - Gratuito e Offline)**
+```bash
+# Baixar e instalar: https://ollama.com/download
+# Depois, baixar um modelo:
+ollama pull llama3.2:3b
+```
+
+**Opção 2: OpenAI (Pago)**
+```bash
+export OPENAI_API_KEY='sua-chave-aqui'
+```
+
+**Opção 3: Groq (Gratuito com limites)**
+```bash
+export GROQ_API_KEY='sua-chave-aqui'
+```
+
+### 4. Executar o Assistente
+
+**Versão com IA (recomendado):**
+```bash
+python assistente_ia.py
+```
+
+**Versão básica (sem IA):**
 ```bash
 python assistente_gestos.py
 ```
 
-### 3. Interagir
+### 5. Interagir
 
 1. Mostre a **mão aberta** para ativar (status fica verde)
 2. Mostre **um dedo** para gravar um comando de voz
@@ -66,14 +99,17 @@ Pressione **ESC** para sair.
 
 ```
 hand_tracking/
-├── assistente_gestos.py      # Aplicação principal integrada
+├── assistente_ia.py          # ⭐ Assistente com IA conversacional e TTS
+├── assistente_gestos.py      # Assistente básico (sem IA)
+├── ai_assistant.py           # Módulo de IA (Ollama/OpenAI/Groq)
+├── command_executor.py       # Executor de comandos do sistema
 ├── gesture_recognition.py    # Módulo de reconhecimento de gestos
 ├── voice_recognition.py      # Módulo de reconhecimento de voz
 ├── detect_webcam.py          # Script original de detecção de mãos
-├── requirements.txt          # Dependências do projeto
-├── CLAUDE.md                 # Documentação para Claude Code
-├── prompt.txt                # Roadmap do projeto
-└── README.md                 # Este arquivo
+├── GUIA_USO.md              # 📚 Guia completo de uso
+├── INSTALAR_FFMPEG.md       # Tutorial de instalação do FFmpeg
+├── CLAUDE.md                # Documentação para Claude Code
+└── README.md                # Este arquivo
 ```
 
 ## 🛠️ Tecnologias
@@ -82,6 +118,8 @@ hand_tracking/
 - **MediaPipe** - Detecção de mãos e landmarks
 - **OpenCV** - Captura e processamento de vídeo
 - **OpenAI Whisper** - Reconhecimento de voz offline
+- **Ollama / OpenAI / Groq** - IA conversacional
+- **pyttsx3** - Síntese de voz (TTS)
 - **SoundDevice** - Captura de áudio do microfone
 - **NumPy & SciPy** - Processamento de dados
 
@@ -94,11 +132,22 @@ hand_tracking/
 
 ## 🎯 Próximos Passos
 
-- [ ] Adicionar IA conversacional (Ollama/OpenAI/Groq)
-- [ ] Criar comandos customizados (abrir apps, controlar sistema)
-- [ ] Adicionar síntese de voz (TTS)
-- [ ] Melhorar interface visual
-- [ ] Adicionar mais gestos
+### ✅ Implementado
+- [x] IA conversacional com múltiplos providers (Ollama, OpenAI, Groq)
+- [x] Comandos customizados do sistema (abrir apps, volume, pesquisa)
+- [x] Síntese de voz (TTS) para respostas da IA
+- [x] Interface visual aprimorada com status e feedback
+- [x] Documentação completa (GUIA_USO.md)
+
+### 🚀 Melhorias Futuras
+- [ ] Suporte a múltiplas mãos simultâneas
+- [ ] Gestos personalizáveis pelo usuário
+- [ ] Histórico de conversas persistente
+- [ ] Integração com APIs externas (clima, notícias)
+- [ ] Controle de aplicativos específicos (Spotify, PowerPoint)
+- [ ] Reconhecimento facial para perfis de usuário
+- [ ] Dashboard web para configuração
+- [ ] Suporte a comandos via atalhos de teclado
 
 ## 📝 Notas
 
